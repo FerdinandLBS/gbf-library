@@ -1,0 +1,7 @@
+;
+LIBRARY library name
+EXPORT
+ecore_onload 	@1
+ecore_onunload	@2
+ecore_onmessage	@3
+ecore_onstart	@4
