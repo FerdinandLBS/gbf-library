@@ -137,10 +137,9 @@ typedef int (ENET_CALLBACK* cb_udp_received)(
  */
 struct __ease_net_tcp_client {
     SOCKET fd;
-    int is_writable; // if this client is writable or not
-    struct sockaddr_in addr; // the address information of the client
+    int is_writable;
+    struct sockaddr_in addr;
 
-    unsigned buffer_size;
     unsigned char buffer[1];
 };
 
@@ -156,6 +155,26 @@ struct __ease_net_tcp_client {
 #define ENET_CLIENT_CONNECT_WAIT_DEFAULT 5000 // 5 sec
 #define ENET_CLIENT_CONNECT_WAIT_INFINITE -1  // infinite
 
+/* opt parameter in enet_http_set */
+#define ENET_HTTP_SET_HEADER 0
+#define ENET_HTTP_SET_URL    1
+#define ENET_HTTP_SET_BODY   2
+
+/* opt parameter in enet_http_fetch() */
+#define ENET_HTTP_GET_RAW    0
+#define ENET_HTTP_GET_HEADER 1
+#define ENET_HTTP_GET_CODE   2
+#define ENET_HTTP_GET_STATUS 3
+#define ENET_HTTP_GET_BODY   4
+#define ENET_HTTP_GET_VERION 5
+#define ENET_HTTP_GET_REQUEST 6
+
+/* method parameter in enet_http_exec() */
+#define ENET_HTTP_GET       0
+#define ENET_HTTP_POST      1
+#define ENET_HTTP_PUT       2
+#define ENET_HTTP_DELETE    3
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -165,24 +184,27 @@ extern "C" {
      *                          TOOL  FUNCTIONS                         *
      *                                                                  *
      ********************************************************************/
-    int ENET_CALLCONV enet_name_to_ip(char* name);
-	
-	/*
-	 * ip_sock: when port is set to -1. ip_sock will be recognized as sock. Other
-	 * wise it would be ip address
-	 */
-	enet_status_t ENET_CALLCONV enet_http_post(int ip_sock, int port, const char* url, const char* param, const char* content, char** output);
+    enet_status_t ENET_CALLCONV enet_http_new(const char* url, int* handle);
+    enet_status_t ENET_CALLCONV enet_http_set(int handle, int opt, void* key, void* value);
+    enet_status_t ENET_CALLCONV enet_http_exec(int handle, int method);
+    enet_status_t ENET_CALLCONV enet_http_fetch(int handle, int opt, const char* key, void** data, int* size);
+    enet_status_t ENET_CALLCONV enet_http_del(int handle);
 
-	enet_status_t ENET_CALLCONV enet_http_get(int ip_sock, int port, const char* url, const char* param, char** output);
+    enet_status_t ENET_CALLCONV enet_http_post(int ip, int port, const char* url, const char* param, const char* content, char** output);
+    enet_status_t ENET_CALLCONV enet_http_get(int ip, int port, const char* url, const char* param, char** output);
 
+    void ENET_CALLCONV enet_http_free(void* p);
 
+    int ENET_CALLCONV enet_name_to_ip(const char* name);
+    
     /********************************************************************
      *                                                                  *
      *                        TCP SERVER FUNCTIONS                      *
      *                                                                  *
      ********************************************************************/
+
     /**
-     * Create TCP Server
+    * Create TCP Server
      * @description:
      *     If connection callback is null, all connections will be accepted.
      *     If receiving callback is null, all received data will be dropped.
@@ -271,7 +293,6 @@ extern "C" {
         void* data,
         int size
         );
-    
 
     enet_status_t ENET_CALLCONV enet_tcp_server_wait_packet(
         enet_handle_t* server,
@@ -282,9 +303,9 @@ extern "C" {
         );
 
     /**
-     * Get current clients count
-     * @description:
-     *     Just the count when you call. Not real-time number
+    * Get current clients count
+    * @description:
+    *     Just the count when you call. Not real-time number
      * @input: pointer of server handle
      * @output: count of clients
      * @return: status
@@ -373,6 +394,7 @@ extern "C" {
         );
     
 
+    
     /********************************************************************
      *                                                                  *
      *                        UDP FUNCTIONS                             *
