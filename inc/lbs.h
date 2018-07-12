@@ -8,6 +8,13 @@ typedef unsigned short lbs_word_t;
 typedef unsigned int   lbs_dword_t;
 typedef unsigned int   lbs_size_t;
 typedef unsigned int   lbs_status_t;
+typedef int            lbs_bool_t;
+
+#define LBS_TRUE 1
+#define LBS_FALSE 0
+
+#define LBS_MAX_U32 4294967295
+#define LBS_MAX_S32 2147483647
 
 /*
  * Error codes

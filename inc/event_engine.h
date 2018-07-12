@@ -3,6 +3,7 @@
 
 #include <lbs.h>
 
+/* The maximun DB size of event queue */
 #define DEFAULT_EVENT_DB_SIZE 2000
 
 /**
@@ -11,8 +12,20 @@
 #define EE_TIMER_DONE  0x0000 // timer should be removed after triggered
 #define EE_TIMER_RESET 0X0001 // timer should be reuse after triggered
 
+/**
+ * Event Callback
+ * 
+ * This function is used to info the caller that one event has been triggerd
+ * in another thread. So that caller can process task in an asynchronous way.
+ */
 typedef lbs_status_t (LBS_CALLCONV *fn_event_disptcher)(void* object, void* param1, void* param2, unsigned event_id);
 
+/**
+ * Timer Callback
+ *
+ * This function is used to info the caller that one timer has triggerd.
+ * Try to avoid process complex mission here.
+ */
 typedef lbs_status_t (LBS_CALLCONV *fn_timer_callback)(void* param, unsigned id);
 
 #ifdef __cplusplus 

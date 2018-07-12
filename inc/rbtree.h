@@ -1,6 +1,8 @@
 #ifndef _RBTREE_H_
 #define _RBTREE_H_
 
+#include <stdlbs.h>
+
 /**
  * Customized Red-black Binary Tree
  *
@@ -49,7 +51,6 @@ typedef struct __rbtree_st_ {
 }rbtree_t;
 
 /* rb-tree running mode */
-#define RBT_MODE_DEFAULT 0
 #define RBT_MODE_INTEGRITY  0x00000001
 //#define RBT_MODE_MUL_THREAD 0x00000002
 
@@ -81,9 +82,10 @@ extern "C" {
      * @input: key
      * @input: data
      * @input: update data if exists
+     * @inputL old data, if update
      * @return: status
      */
-    int rbt_insert(rbtree_t* tree, int key, void* data, int is_update);
+    int rbt_insert(rbtree_t* tree, int key, void* data, lbs_bool_t is_update, void** old_data);
 
     /**
      * find a node by key

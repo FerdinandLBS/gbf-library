@@ -15,7 +15,7 @@
 #endif
 
 #include <thp.h>
-#include <lbs_23tree.h>
+#include <rbtree.h>
 #include <lbs_thread.h>
 
 /* Handle of ease net object */
@@ -78,7 +78,7 @@ struct __ease_net_tcp_server {
     cb_tcp_server_received  recv_cb;
 
     /* Tree of clients */
-    lbs_23tree_t* clients_tree;
+    rbtree_t* clients_tree;
 };
 
 /*

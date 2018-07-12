@@ -15,24 +15,6 @@
 
 #define MAX_LOGSIZE				100*1024*1024
 
-/* Common */
-#define LOG_E_SUCCESS			 0
-#define LOG_E_UNKNOW			-1
-#define LOG_E_INVALID_PARA		-2
-#define LOG_E_FILE_NOT_EXIST	-3
-#define LOG_E_FILE_OPEN_FAILE	-4
-#define LOG_E_FILE_BAD_FORMAT	-5
-#define LOG_E_BAD_PTR			-6
-#define LOG_E_OPERATION_FAILED	-7
-#define LOG_E_LOW_PRIVILEGE		-8
-#define LOG_E_BAD_MEM			-9
-/* Common */
-
-/* File operation */
-#define LOG_E_ALREADY_EXIST		 1
-#define LOG_E_OPEN_FAILED		 2
-/* File operation */
-
 /* Log level */
 #define LOG_DEBUG				 8
 #define LOG_WARN				 9

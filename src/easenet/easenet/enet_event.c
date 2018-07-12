@@ -13,12 +13,12 @@
 
 lbs_thread_t __enet_event_thread = 0;
 lbs_lock_t* __enet_event_lock = 0;
-int __event_iterator = 0;
-int __event_head = 0;
-int __event_tail = 0;
-int __event_is_ready = 0;
-int __event_item_count = 0;
-int __event_total_handler = 0;
+int __enet_eventiterator = 0;
+int __enet_eventhead = 0;
+int __enet_eventtail = 0;
+int __enet_eventis_ready = 0;
+int __enet_eventitem_count = 0;
+int __enet_eventtotal_handler = 0;
 
 typedef struct __enet_event_info {
     void* object;
@@ -47,41 +47,39 @@ INTERNALCALL int enet_pop_event(ENET_EVENT_INFO* event_info)
 {
     int result = 0;
 
-continue_waiting:
-    while (__event_item_count == 0) {
+    while (1) {
         /*
          * For a real server, Sleep(0) or SwitchToThread() is OK. We dont consider the CPU too much.
          * But in normal APP, Sleep(1) is better and releases much more CPU resource.
          */
+        enet_event_db_lock();
+        if (__enet_eventitem_count > 0) {
+            break;
+        }
+        enet_event_db_unlock();
         enet_sleep(1);
         //SwitchToThread();
     }
 
-    enet_event_db_lock();
 
-	if (__event_item_count == 0) {
-		enet_event_db_unlock();
-		goto continue_waiting;
-	}
+    event_info->id = __enet_event_db[__enet_eventhead].id;
+    event_info->object = __enet_event_db[__enet_eventhead].object;
+    event_info->param1 = __enet_event_db[__enet_eventhead].param1;
+    event_info->param2 = __enet_event_db[__enet_eventhead].param2;
 
-    event_info->id = __enet_event_db[__event_head].id;
-    event_info->object = __enet_event_db[__event_head].object;
-    event_info->param1 = __enet_event_db[__event_head].param1;
-    event_info->param2 = __enet_event_db[__event_head].param2;
+    __enet_event_db[__enet_eventhead].id = ENET_EVENT_NOPE;
 
-    __enet_event_db[__event_head].id = ENET_EVENT_NOPE;
-
-    if (__event_item_count > 1)
-        if (__event_head < ENET_DEFAULT_EVENT_DB_SIZE - 1) {
-            __event_head++;
+    if (__enet_eventitem_count > 1)
+        if (__enet_eventhead < ENET_DEFAULT_EVENT_DB_SIZE - 1) {
+            __enet_eventhead++;
         } else {
-            __event_head = 0;
+            __enet_eventhead = 0;
         }
     else
-        assert(__event_head == __event_tail);
+        assert(__enet_eventhead == __enet_eventtail);
 
     result = 1;
-    __event_item_count--;
+    __enet_eventitem_count--;
 
     enet_event_db_unlock();
 
@@ -159,7 +157,7 @@ unsigned LBS_THREAD_CALL enet_event_handler(void* param)
             }
             break;
         default:
-            ;//printf("invalid message type, count %d\n", __event_total_handler);
+            ;//printf("invalid message type, count %d\n", __enet_eventtotal_handler);
         }
     }
 
@@ -171,7 +169,7 @@ lbs_status_t enet_init_event_handler()
     int result;
     lbs_status_t st;
 
-    if (__event_is_ready) {
+    if (__enet_eventis_ready) {
         return 0;
     }
     
@@ -203,7 +201,7 @@ lbs_status_t enet_init_event_handler()
         return st;
     }
 
-    __event_is_ready = 1;
+    __enet_eventis_ready = 1;
 
     return LBS_CODE_OK;
 }
@@ -218,23 +216,23 @@ lbs_status_t enet_post_event(void* object, void* param1, void* param2,  ENET_EVE
     enet_event_db_lock();
 
     /* Data base is full */
-    if (__event_item_count == ENET_DEFAULT_EVENT_DB_SIZE)
+    if (__enet_eventitem_count == ENET_DEFAULT_EVENT_DB_SIZE)
         goto escape;
     
     /* If the event count eq zero, tail should not move */
-    if (__event_item_count != 0)
-        if (__event_tail < ENET_DEFAULT_EVENT_DB_SIZE - 1) {
-            __event_tail++;
+    if (__enet_eventitem_count != 0)
+        if (__enet_eventtail < ENET_DEFAULT_EVENT_DB_SIZE - 1) {
+            __enet_eventtail++;
         } else {
-            __event_tail = 0;
+            __enet_eventtail = 0;
         }
 
-    __enet_event_db[__event_tail].id = event_id;
-    __enet_event_db[__event_tail].object = object;
-    __enet_event_db[__event_tail].param1 = param1;
-    __enet_event_db[__event_tail].param2 = param2;
-    __event_item_count++;
-    __event_total_handler++;
+    __enet_event_db[__enet_eventtail].id = event_id;
+    __enet_event_db[__enet_eventtail].object = object;
+    __enet_event_db[__enet_eventtail].param1 = param1;
+    __enet_event_db[__enet_eventtail].param2 = param2;
+    __enet_eventitem_count++;
+    __enet_eventtotal_handler++;
 
     st = LBS_CODE_OK;
 
