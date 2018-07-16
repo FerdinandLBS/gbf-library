@@ -585,6 +585,7 @@ lbs_status_t thp_delete_watcher(thp_handle_t* watcher)
     THP_THREAD_INFO* node;
     THP_THREAD_WATCHER* object;
     lbs_status_t rc;
+    lbs_bool_t is_ready = LBS_FALSE;
 
     object = thp_get_watcher_object(watcher);
 
@@ -593,8 +594,10 @@ lbs_status_t thp_delete_watcher(thp_handle_t* watcher)
         return rc;
     }
 
+    if (object->status == THP_WATCHER_READY)
+        is_ready = LBS_TRUE;
     object->status = THP_WATCHER_TERM;
-    if (object->watcher) {
+    if (!is_ready && object->watcher) {
         if (WAIT_OBJECT_0 != WaitForSingleObject(object->watcher->handle, 1000)) {
             TerminateThread(object->watcher->handle, 0);   
         }
@@ -604,7 +607,7 @@ lbs_status_t thp_delete_watcher(thp_handle_t* watcher)
     node = object->threads;
     while (node) {
         THP_THREAD_INFO* temp;
-        if (WAIT_OBJECT_0 != WaitForSingleObject(node->handle, 1000)) {
+        if (!is_ready && WAIT_OBJECT_0 != WaitForSingleObject(node->handle, 1000)) {
             TerminateThread(node->handle, 0);   
         }
         temp = node;

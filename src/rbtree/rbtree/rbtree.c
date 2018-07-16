@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "rbtree.h"
+#include <rbtree.h>
 
 #define IS_LEAF_NODE(_node_) ((_node_->lnode == 0) || _node_->lnode != 0 &&)
 #define KEY_EXIST 1
@@ -342,11 +342,14 @@ rbtree_node_t* rbt_prev(rbtree_node_t* current)
     }
 }
 
-int rbt_insert(rbtree_t* tree, int key, void* data, int is_update)
+int rbt_insert(rbtree_t* tree, int key, void* data, lbs_bool_t is_update, void** old_data)
 {
     rbtree_node_t* node;
     rbtree_node_t* parent;
     rbtree_node_t* grandpa;
+
+    if (is_update == LBS_TRUE && old_data == 0)
+        return LBS_CODE_INV_PARAM;
 
     /* empty tree */
     if (tree->root == 0) {
@@ -362,6 +365,7 @@ int rbt_insert(rbtree_t* tree, int key, void* data, int is_update)
     while (1) {
         if (node->key == key) {
             if (is_update) {
+                *old_data = node->data;
                 node->data = data;
                 return 0;
             } else {
@@ -719,6 +723,7 @@ static void delete_sub_tree(rbtree_node_t* root)
     free(root);
 }
 
+// TODO: we should provide callback function to handle data destruction
 void rbt_delete_tree(rbtree_t* tree)
 {
     if (!tree)

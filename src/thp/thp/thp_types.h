@@ -4,7 +4,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-#include <lbs_errno.h>
+#include <lbs.h>
 #include "thp_rwlock.h"
 
 typedef unsigned int lbs_status_t;
